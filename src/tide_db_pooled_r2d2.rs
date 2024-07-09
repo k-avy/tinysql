@@ -1,7 +1,6 @@
 use tide::{Request, Response, Result};
 use serde::{Deserialize, Serialize};
-use rusqlite::Connection;
-use r2d2::{Pool, PooledConnection};
+use r2d2::{Pool};
 use r2d2_sqlite::SqliteConnectionManager;
 use std::time::Instant;
 
