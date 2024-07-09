@@ -1,31 +1,63 @@
-// mod threadpooling;
-// // mod server_db_pool;
-// mod tidensled;
-// mod tiny_sqlx;
-// mod db_insert;
-// mod tide_db;
-// mod tide_qury;
-// mod tiny_host;
-mod tide_host;
+mod tinyhttp_db_pooled_rayon;
+mod tide_db_embeded;
+mod tide_db_pooled_r2d2;
+mod tinyhttp_routes_crud;
+mod tide_routes_crud;
+mod tinyhttp_db_hosted;
+mod tinyhttp_rayon_db_pooled_r2d2;
 
-// use threadpooling::tiny_fn;
-// use server_db_pool::start_server;
-// use tiny_sqlx::tinysqlserver;
-// use tidensled::tidendb;
-// use db_insert::tiny_fn;
-// use tide_db::tide_fn;
-// use tide_qury::tide_fn;
-// use tiny_host::tiny_fn;
-use tide_host::tide_fn;
+use std::{io::{self, Write}};
+
+use async_std::task;
+use tinyhttp_db_hosted::tiny_db_hosted;
+use tinyhttp_db_pooled_rayon::tiny_pooled;
+use tide_db_embeded::tide_embedded;
+use tide_db_pooled_r2d2::tide_pooled_db;
+use tinyhttp_routes_crud::tinyhttp_crud;
+use tide_routes_crud::tide_crud;
+use tinyhttp_rayon_db_pooled_r2d2::server_db_pooled;
+
+fn call_function(name: &str, operation: Option<&str>) {
+    match name {
+        "tiny_db_hosted" => tiny_db_hosted(),
+        "tiny_pooled" => tiny_pooled(),
+        "tide_embedded" => task::block_on(tide_embedded()),
+        "tide_pooled_db" => task::block_on(tide_pooled_db()),
+        "tinyhttp_crud" => tinyhttp_crud(operation),
+        "tide_crud" => task::block_on(tide_crud(operation)),
+        "server_db_pooled" => server_db_pooled(),
+        _ => println!("Function not found"),
+    }
+}
 fn main() {
 
-    // tide_fn();
-    // tiny_fn();
-   async_std::task::block_on(tide_fn());
+    let mut input = String::new();
 
-//    start_server();
-    
-//    async_std::task::block_on(tinysqlserver()).unwrap();
-    // async_std::task::block_on(tidendb()).unwrap();
+    println!("Enter the function name to call:");
+
+    // Flush stdout to ensure the prompt is shown before input
+    io::stdout().flush().unwrap();
+
+    // Read the input from the user
+    io::stdin().read_line(&mut input).expect("Failed to read input");
+
+    // Trim the input to remove any leading/trailing whitespace
+    let input = input.trim();
+    let mut operation = String::new();
+    let operation_option = if input == "tinyhttp_crud" || input == "tide_crud" {
+        println!("Enter the CRUD operation (create, read, update, delete):");
+
+        // Flush stdout to ensure the prompt is shown before input
+        io::stdout().flush().unwrap();
+
+        // Read the CRUD operation from the user
+        io::stdin().read_line(&mut operation).expect("Failed to read input");
+        Some(operation.trim().to_string())
+    } else {
+        None
+    };
+    // Call the corresponding function
+    call_function(input,  operation_option.as_deref());
 
 }
+
