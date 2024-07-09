@@ -114,7 +114,3 @@ pub fn handle_request(mut request: TinyRequest, pool_sqlite: Pool<SqliteConnecti
         }
     }
 }
-
-fn main() {
-    server_db_pooled();
-}
